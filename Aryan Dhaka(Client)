@@ -1,0 +1,184 @@
+import javax.swing.*;
+import javax.swing.border.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
+import java.text.*;
+import java.net.*;
+import java.io.*;
+ public class chat_application_client  implements ActionListener {
+        JTextField t1;
+       static JPanel p2;
+       static Box vertical = Box.createVerticalBox();
+
+        static DataOutputStream dout;
+      static   JFrame f=new JFrame();
+
+        chat_application_client() {
+//        FRAME
+            f.setLayout(null);
+           f.setSize(400, 600);
+           f.setUndecorated(true);
+            f.setLocation(800, 100);
+           f.getContentPane().setBackground(Color.WHITE);
+
+//        top vala panel(green)
+
+            JPanel j1 = new JPanel();
+            j1.setBounds(0, 0, 400, 75);
+            j1.setBackground(new Color(7, 94, 84));
+            j1.setLayout(null);
+           f.add(j1);
+
+//      Image
+            ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("icons/3.png"));
+            Image i2 = i1.getImage().getScaledInstance(25, 25, Image.SCALE_DEFAULT);
+            ImageIcon i3 = new ImageIcon(i2);
+            JLabel J1 = new JLabel(i3);
+            J1.setBounds(6, 10, 30, 50);
+            j1.add(J1);
+//        image 2
+            ImageIcon i4 = new ImageIcon(ClassLoader.getSystemResource("icons/videoicon.png"));
+            Image i5 = i4.getImage().getScaledInstance(25, 25, Image.SCALE_DEFAULT);
+            ImageIcon i6 = new ImageIcon(i5);
+            JLabel J2 = new JLabel(i6);
+            J2.setBounds(270, 10, 30, 50);
+            j1.add(J2);
+//        image 3
+            ImageIcon i7 = new ImageIcon(ClassLoader.getSystemResource("icons/phoneicon.png"));
+            Image i8 = i7.getImage().getScaledInstance(25, 25, Image.SCALE_DEFAULT);
+            ImageIcon i9 = new ImageIcon(i8);
+            JLabel J3 = new JLabel(i9);
+            J3.setBounds(320, 10, 30, 50);
+            j1.add(J3);
+//        image 4
+            ImageIcon i10 = new ImageIcon(ClassLoader.getSystemResource("icons/3dots.png"));
+            Image i11 = i10.getImage().getScaledInstance(8, 25, Image.SCALE_DEFAULT);
+            ImageIcon i12 = new ImageIcon(i11);
+            JLabel J4 = new JLabel(i12);
+            J4.setBounds(355, 10, 30, 50);
+            j1.add(J4);
+
+//        image 5
+            ImageIcon i13 = new ImageIcon(ClassLoader.getSystemResource("icons/dp.png"));
+            Image i14 = i13.getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT);
+            ImageIcon i15 = new ImageIcon(i14);
+            JLabel J5 = new JLabel(i15);
+            J5.setBounds(50, 12, 50, 50);
+            j1.add(J5);
+//      name()Aryan dhaka
+            JLabel l1 = new JLabel("Aryan Dhaka");
+            l1.setBounds(125, 27, 200, 20);
+            l1.setForeground(Color.WHITE);
+            l1.setFont(new Font("Arial", Font.BOLD, 17));
+            j1.add(l1);
+
+//        niche vala panel
+            t1 = new JTextField();
+            t1.setBounds(3, 555, 275, 40);
+            t1.setFont(new Font("Arial", Font.ITALIC, 15));
+            t1.setBackground(Color.WHITE);
+            f.add(t1);
+//        back button
+            J1.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    System.exit(0);
+                }
+            });
+//         send button
+            JButton b1 = new JButton("Send");
+            b1.setBackground(new Color(7, 94, 84));
+            b1.setBounds(290, 555, 100, 40);
+            b1.addActionListener(this);
+            b1.setFont(new Font("Arial", Font.BOLD, 18));
+           f.add(b1);
+//        Big Frame
+            p2 = new JPanel();
+            p2.setBounds(2, 80, 396, 467);
+            p2.setBackground(Color.LIGHT_GRAY);
+           f.add(p2);
+
+
+           f.setVisible(true);
+        }
+
+ public void actionPerformed (ActionEvent ae){
+            try{
+                String out= t1.getText();
+                JPanel p3 = formatLabel(out);
+
+
+                p2.setLayout(new BorderLayout());
+                JPanel right= new JPanel(new BorderLayout());
+                right.add(p3,BorderLayout.LINE_END);
+                vertical.add(right);
+                vertical.add(Box.createVerticalStrut(10));
+                p2.add(vertical,BorderLayout.PAGE_START);
+                dout.writeUTF(out);
+                t1.setText("");
+
+                f.repaint();
+                f.invalidate();
+                f.validate();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+ }
+     public static JPanel formatLabel(String out){
+         JPanel panel= new JPanel();
+
+         panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+         JLabel output= new JLabel("<html><p style=\"width: 150px\">" + out + "</p></html>");
+         output.setFont(new Font("Tahoma",Font.PLAIN,16));
+         output.setBackground(new Color(37,211,102));
+         output.setOpaque(true);
+         output.setBorder(new EmptyBorder(15,15,15,50 ));
+         panel.add(output);
+//        set time
+         Calendar calendar = Calendar.getInstance();
+         SimpleDateFormat sdf= new SimpleDateFormat("HH:mm");
+         JLabel time = new JLabel();
+         time.setText(sdf.format(calendar.getTime()));
+         panel.add(time);
+
+
+         return panel;
+
+ }
+
+    public static void main(String[] args) {
+        new chat_application_client();
+
+            try
+            {
+            Socket s= new Socket("127.0.0.1",6001);
+                DataInputStream din = new DataInputStream(s.getInputStream());
+                dout = new DataOutputStream(s.getOutputStream());
+                while (true) {
+                p2.setLayout(new BorderLayout());
+                    String msg = din.readUTF();
+                    JPanel panel = formatLabel(msg);
+
+                    JPanel left = new JPanel(new BorderLayout());
+                    left.add(panel, BorderLayout.LINE_START);
+                    vertical.add(left);
+                    vertical.add(Box.createVerticalStrut(10));
+                    p2.add(vertical,BorderLayout.PAGE_START);
+                    f.validate();
+                }
+            }
+            catch (Exception e){
+                e.printStackTrace();
+
+            }
+
+
+
+
+
+
+    }
+}
+
